@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -217,12 +219,12 @@ public class JwtService {
         try {
             byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
             return Keys.hmacShaKeyFor(keyBytes);
-        } catch (IllegalArgumentException e) {
+        } catch (DecodingException | IllegalArgumentException e) {
             // Fallback: use the secret as raw bytes (for dev/testing)
             // In production, always use a proper Base64-encoded secret
             logger.warn("JWT secret is not Base64-encoded, using raw bytes. " +
                     "Set a proper Base64-encoded secret in production.");
-            return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+            return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         }
     }
 }
