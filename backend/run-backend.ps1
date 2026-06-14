@@ -12,6 +12,7 @@ if (-not $java17Home) {
 
 $env:JAVA_HOME = $java17Home
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+$env:SPRING_DOCKER_COMPOSE_ENABLED = 'true'
 
 Write-Host 'Using Java:'
 & "$env:JAVA_HOME\bin\java.exe" -version

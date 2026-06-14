@@ -26,6 +26,7 @@ if not defined JAVA17_HOME (
 
 set "JAVA_HOME=%JAVA17_HOME%"
 set "PATH=%JAVA_HOME%\bin;%PATH%"
+set "SPRING_DOCKER_COMPOSE_ENABLED=true"
 
 echo Using JAVA_HOME=%JAVA_HOME%
 "%JAVA_HOME%\bin\java.exe" -version

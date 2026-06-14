@@ -2,6 +2,7 @@ package com.spreetail.expenses.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -42,9 +43,13 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final String corsAllowedOrigins;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080}") String corsAllowedOrigins) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.corsAllowedOrigins = corsAllowedOrigins;
     }
 
     /**
@@ -135,13 +140,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allowed origins: React dev server + production frontend.
-        // TODO: Move to environment variable for production deployment.
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",    // React dev server (default port)
-                "http://localhost:5173",    // Vite dev server (alternative)
-                "http://localhost:8080"     // Same-origin (for testing)
-        ));
+        configuration.setAllowedOrigins(
+                Arrays.stream(corsAllowedOrigins.split(","))
+                        .map(String::trim)
+                        .filter(origin -> !origin.isBlank())
+                        .toList()
+        );
 
         // Allowed HTTP methods for API calls.
         configuration.setAllowedMethods(Arrays.asList(

@@ -3,14 +3,30 @@ services:
     name: shared-expense-backend
     runtime: docker
     plan: free
-    rootDir: backend
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     healthCheckPath: /api/health
     envVars:
-      - key: DATABASE_URL
+      - key: DATABASE_HOST
         fromDatabase:
           name: shared-expense-db
-          property: connectionString
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: shared-expense-db
+          property: port
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: shared-expense-db
+          property: database
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: shared-expense-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: shared-expense-db
+          property: password
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRATION
@@ -19,6 +35,8 @@ services:
         value: 83.00
       - key: SPRING_DOCKER_COMPOSE_ENABLED
         value: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://shared-expense-frontend.onrender.com
 
   - type: web
     name: shared-expense-frontend
