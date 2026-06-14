@@ -144,6 +144,15 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Starts the local PostgreSQL service from backend/compose.yaml
+             when running the app directly with mvn spring-boot:run. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-docker-compose</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
         <!-- =======================================================
              TESTING
              ======================================================= -->

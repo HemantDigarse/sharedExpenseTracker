@@ -32,8 +32,9 @@ cd backend
 ```
 Backend starts at `http://localhost:8080`
 
-If you run `mvn spring-boot:run` directly, make sure `JAVA_HOME` points to Java 17.
-Spring Boot 3.2 cannot run with Java 8.
+The backend needs PostgreSQL on `localhost:5432`. The `run-backend.cmd` helper checks that port and starts the Docker `postgres` service automatically if it is not already running.
+
+If you run `mvn spring-boot:run` directly, start PostgreSQL first and make sure `JAVA_HOME` points to Java 17. Spring Boot 3.2 cannot run with Java 8.
 
 To verify the Java version Maven is using:
 ```bash

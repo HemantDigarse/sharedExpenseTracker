@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: expense-tracker-db
+    environment:
+      POSTGRES_DB: expense_tracker
+      POSTGRES_USER: expense_user
+      POSTGRES_PASSWORD: expense_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - expense-tracker-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U expense_user -d expense_tracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  expense-tracker-pgdata:
+    driver: local
