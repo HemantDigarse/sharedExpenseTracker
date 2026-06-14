@@ -1,58 +1,82 @@
-# ==============================================================
-# Docker Compose — Local Development Environment
-# ==============================================================
-# Provides a PostgreSQL 16 instance for local development.
-# Backend and frontend services will be added in Step 14.
+# ================================================================
+# Docker Compose — Full Stack Deployment
+# ================================================================
+# Runs all 3 services: PostgreSQL, Spring Boot Backend, React Frontend
 #
 # Usage:
-#   docker compose up -d          Start PostgreSQL
-#   docker compose down           Stop PostgreSQL
-#   docker compose down -v        Stop + delete data volume
-#
-# The database is accessible at localhost:5432 with the
-# credentials defined below. These match the defaults in
-# application.properties.
-# ==============================================================
-
-version: '3.8'
+#   docker-compose up -d          # Start all services
+#   docker-compose down           # Stop all services
+#   docker-compose logs -f        # Follow all logs
+#   docker-compose logs backend   # Follow backend logs only
+# ================================================================
 
 services:
-
-  # ============================================================
-  # PostgreSQL 16 — Primary datastore
-  # ============================================================
-  # We use PostgreSQL (not MySQL, MongoDB, etc.) because:
-  #   - Strong ACID compliance for financial data
-  #   - Native ENUM types for split_type, currency, etc.
-  #   - Partial indexes for fast active-member lookups
-  #   - NUMERIC type for precise monetary calculations
-  # See DECISIONS.md: "Why PostgreSQL"
-  # ============================================================
+  # ---- PostgreSQL Database ----
   postgres:
     image: postgres:16-alpine
     container_name: expense-tracker-db
-    restart: unless-stopped
     environment:
       POSTGRES_DB: expense_tracker
       POSTGRES_USER: expense_user
       POSTGRES_PASSWORD: expense_pass
     ports:
-      # Map container port 5432 to host port 5432.
-      # Change the host port if 5432 is already in use:
-      #   "5433:5432"
       - "5432:5432"
     volumes:
-      # Named volume for data persistence across container restarts.
-      # Data survives 'docker compose down' but NOT 'docker compose down -v'.
-      - expense_tracker_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      # Verify PostgreSQL is ready to accept connections.
-      # Used by dependent services (backend) to wait for DB readiness.
       test: ["CMD-SHELL", "pg_isready -U expense_user -d expense_tracker"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - expense-network
+
+  # ---- Spring Boot Backend ----
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: expense-tracker-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/expense_tracker
+      DATABASE_USERNAME: expense_user
+      DATABASE_PASSWORD: expense_pass
+      JWT_SECRET: prod-secret-key-change-me-to-at-least-32-chars-in-production
+      JWT_EXPIRATION: 86400000
+      USD_TO_INR_RATE: 83.00
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    networks:
+      - expense-network
+
+  # ---- React Frontend (Nginx) ----
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: expense-tracker-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    networks:
+      - expense-network
 
 volumes:
-  expense_tracker_data:
+  pgdata:
     driver: local
+
+networks:
+  expense-network:
+    driver: bridge

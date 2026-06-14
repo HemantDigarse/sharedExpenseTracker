@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -14,7 +14,6 @@ export default function AppLayout() {
   const navItems = [
     { path: '/', icon: 'home', label: 'Home', exact: true },
     { path: '/groups', icon: 'group', label: 'Groups' },
-    { path: '/activity', icon: 'history', label: 'Activity' },
   ];
 
   const isActive = (item) => {
@@ -27,14 +26,30 @@ export default function AppLayout() {
       {/* Top App Bar */}
       <header className="top-app-bar">
         <NavLink to="/" className="top-app-bar__brand">
-          <span className="material-symbols-outlined top-app-bar__brand-icon">account_balance_wallet</span>
+          <span className="top-app-bar__brand-mark">
+            <span className="material-symbols-outlined top-app-bar__brand-icon">account_balance_wallet</span>
+          </span>
           <span className="top-app-bar__brand-name">SplitSmart</span>
         </NavLink>
 
-        <div className="flex items-center gap-md">
-          <div className="top-app-bar__avatar" onClick={logout} title="Sign out">
+        <nav className="top-app-bar__nav" aria-label="Primary navigation">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={`top-app-bar__nav-item ${isActive(item) ? 'top-app-bar__nav-item--active' : ''}`}
+              end={item.exact}
+            >
+              <span className={`material-symbols-outlined ${isActive(item) ? 'filled' : ''}`}>{item.icon}</span>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="top-app-bar__actions">
+          <button className="top-app-bar__avatar" onClick={logout} title="Sign out" type="button">
             {getInitials(user?.fullName)}
-          </div>
+          </button>
         </div>
       </header>
 

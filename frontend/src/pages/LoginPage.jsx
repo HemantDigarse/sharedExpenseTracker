@@ -30,120 +30,125 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
-        {/* Brand */}
-        <div className="auth-brand">
-          <div className="auth-brand__icon-wrapper">
-            <span className="material-symbols-outlined auth-brand__icon">account_balance_wallet</span>
+      <section className="auth-shell">
+        <aside className="auth-showcase" aria-label="SplitSmart highlights">
+          <div className="auth-showcase__brand">
+            <span className="material-symbols-outlined">account_balance_wallet</span>
+            <span>SplitSmart</span>
           </div>
-          <h1 className="auth-brand__name">SplitSmart</h1>
-          <p className="auth-brand__tagline">Simplifying shared expenses for everyone.</p>
-        </div>
-
-        {/* Welcome Text */}
-        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>Welcome back</h2>
-        <p className="text-body-sm text-muted" style={{ marginBottom: '24px' }}>
-          Please enter your details to sign in.
-        </p>
-
-        {/* Error Message */}
-        {error && (
-          <div style={{
-            background: 'var(--error-container)',
-            color: 'var(--on-error-container)',
-            padding: '12px 16px',
-            borderRadius: 'var(--radius-lg)',
-            marginBottom: '16px',
-            fontSize: '14px',
-            fontWeight: 500,
-          }}>
-            {error}
+          <div>
+            <p className="auth-eyebrow">Shared expense tracking</p>
+            <h1 className="auth-showcase__title">Settle group expenses with clarity.</h1>
+            <p className="auth-showcase__text">
+              Track rent, trips, meals, and recurring bills with clean balances and fast settlements.
+            </p>
           </div>
-        )}
+          <div className="auth-metrics">
+            <div>
+              <strong>4</strong>
+              <span>split modes</span>
+            </div>
+            <div>
+              <strong>INR</strong>
+              <span>ready</span>
+            </div>
+            <div>
+              <strong>JWT</strong>
+              <span>secured</span>
+            </div>
+          </div>
+        </aside>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="form-group" style={{ marginBottom: '16px' }}>
-            <label className="form-label" htmlFor="login-email">Email Address</label>
-            <div className="form-input-wrapper">
-              <span className="material-symbols-outlined form-input-icon">mail</span>
-              <input
-                id="login-email"
-                type="email"
-                className="form-input form-input--icon"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
+        <div className="auth-card">
+          <div className="auth-brand">
+            <div className="auth-brand__icon-wrapper">
+              <span className="material-symbols-outlined auth-brand__icon">account_balance_wallet</span>
+            </div>
+            <div>
+              <h1 className="auth-brand__name">Welcome back</h1>
+              <p className="auth-brand__tagline">Sign in to review balances and settle up.</p>
             </div>
           </div>
 
-          <div className="form-group" style={{ marginBottom: '24px' }}>
-            <div className="flex justify-between items-center">
+          {error && (
+            <div className="alert alert--error" role="alert">
+              <span className="material-symbols-outlined">error</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="login-email">Email address</label>
+              <div className="form-input-wrapper">
+                <span className="material-symbols-outlined form-input-icon">mail</span>
+                <input
+                  id="login-email"
+                  type="email"
+                  className="form-input form-input--icon"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
               <label className="form-label" htmlFor="login-password">Password</label>
+              <div className="form-input-wrapper">
+                <span className="material-symbols-outlined form-input-icon">lock</span>
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  className="form-input form-input--icon"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  className="form-input-suffix"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <span className="material-symbols-outlined">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
             </div>
-            <div className="form-input-wrapper">
-              <span className="material-symbols-outlined form-input-icon">lock</span>
-              <input
-                id="login-password"
-                type={showPassword ? 'text' : 'password'}
-                className="form-input form-input--icon"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="form-input-suffix"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                  {showPassword ? 'visibility_off' : 'visibility'}
-                </span>
-              </button>
-            </div>
+
+            <button
+              type="submit"
+              className="btn btn--primary btn--full btn--lg"
+              disabled={loading}
+              id="login-submit"
+            >
+              {loading ? (
+                <div className="spinner spinner--sm spinner--light" />
+              ) : (
+                <>
+                  Sign in
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="auth-footer">
+            New to SplitSmart? <Link to="/register">Create an account</Link>
           </div>
 
-          <button
-            type="submit"
-            className="btn btn--primary btn--full"
-            disabled={loading}
-            id="login-submit"
-          >
-            {loading ? (
-              <div className="spinner spinner--sm" style={{ borderTopColor: 'white', borderColor: 'rgba(255,255,255,0.3)' }} />
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
-
-        {/* Footer */}
-        <div className="auth-footer">
-          Don't have an account? <Link to="/register">Create one</Link>
+          <div className="auth-trust-row" aria-label="Security status">
+            <span><span className="material-symbols-outlined">verified_user</span> Secure login</span>
+            <span><span className="material-symbols-outlined">monitor_heart</span> API ready</span>
+          </div>
         </div>
-      </div>
-
-      {/* Status bar */}
-      <div style={{
-        marginTop: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontSize: '12px',
-        color: 'var(--on-surface-variant)',
-      }}>
-        <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--tertiary)' }}>check_circle</span>
-        <span>Systems Operational</span>
-        <span style={{ margin: '0 4px' }}>•</span>
-        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>lock</span>
-        <span>256-bit Secure</span>
-      </div>
+      </section>
     </div>
   );
 }
