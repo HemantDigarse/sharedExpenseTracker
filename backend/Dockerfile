@@ -12,7 +12,7 @@ COPY pom.xml .
 # Download dependencies first (Docker cache layer)
 RUN mvn dependency:go-offline -B
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+RUN mvn clean package -Dmaven.test.skip=true -B
 
 # --- Run Stage ---
 FROM eclipse-temurin:17-jre-alpine
