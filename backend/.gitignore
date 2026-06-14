@@ -1,0 +1,37 @@
+# ==============================================================
+# Backend .gitignore — Spring Boot / Maven
+# ==============================================================
+
+# ---- Maven Build Output ----
+target/
+
+# ---- IDE / Editor ----
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+.factorypath
+
+# ---- Spring Boot ----
+# Application-local config (may contain secrets)
+application-local.properties
+application-local.yml
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+
+# ---- Maven Wrapper ----
+# Include mvnw scripts but exclude downloaded wrapper JARs
+.mvn/wrapper/maven-wrapper.jar
+
+# ---- Environment ----
+.env

@@ -1,0 +1,58 @@
+# ==============================================================
+# Docker Compose — Local Development Environment
+# ==============================================================
+# Provides a PostgreSQL 16 instance for local development.
+# Backend and frontend services will be added in Step 14.
+#
+# Usage:
+#   docker compose up -d          Start PostgreSQL
+#   docker compose down           Stop PostgreSQL
+#   docker compose down -v        Stop + delete data volume
+#
+# The database is accessible at localhost:5432 with the
+# credentials defined below. These match the defaults in
+# application.properties.
+# ==============================================================
+
+version: '3.8'
+
+services:
+
+  # ============================================================
+  # PostgreSQL 16 — Primary datastore
+  # ============================================================
+  # We use PostgreSQL (not MySQL, MongoDB, etc.) because:
+  #   - Strong ACID compliance for financial data
+  #   - Native ENUM types for split_type, currency, etc.
+  #   - Partial indexes for fast active-member lookups
+  #   - NUMERIC type for precise monetary calculations
+  # See DECISIONS.md: "Why PostgreSQL"
+  # ============================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: expense-tracker-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: expense_tracker
+      POSTGRES_USER: expense_user
+      POSTGRES_PASSWORD: expense_pass
+    ports:
+      # Map container port 5432 to host port 5432.
+      # Change the host port if 5432 is already in use:
+      #   "5433:5432"
+      - "5432:5432"
+    volumes:
+      # Named volume for data persistence across container restarts.
+      # Data survives 'docker compose down' but NOT 'docker compose down -v'.
+      - expense_tracker_data:/var/lib/postgresql/data
+    healthcheck:
+      # Verify PostgreSQL is ready to accept connections.
+      # Used by dependent services (backend) to wait for DB readiness.
+      test: ["CMD-SHELL", "pg_isready -U expense_user -d expense_tracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  expense_tracker_data:
+    driver: local

@@ -1,0 +1,26 @@
+# ==============================================================
+# Root .gitignore — Shared Expense Tracker
+# ==============================================================
+
+# ---- IDE / Editor ----
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Environment ----
+.env
+*.env.local
+
+# ---- Docker ----
+# Don't ignore docker-compose.yml — it's part of the project
