@@ -12,9 +12,7 @@ services:
           name: shared-expense-db
           property: host
       - key: DATABASE_PORT
-        fromDatabase:
-          name: shared-expense-db
-          property: port
+        value: 5432
       - key: DATABASE_NAME
         fromDatabase:
           name: shared-expense-db
