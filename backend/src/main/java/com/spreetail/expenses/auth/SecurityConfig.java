@@ -3,6 +3,7 @@ package com.spreetail.expenses.auth;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -80,6 +81,8 @@ public class SecurityConfig {
 
                 // Define URL-level authorization rules.
                 .authorizeHttpRequests(auth -> auth
+                        // PUBLIC: CORS preflight requests
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // PUBLIC: authentication endpoints (login, register)
                         .requestMatchers("/api/auth/**").permitAll()
                         // PUBLIC: health check endpoint for monitoring/deployment
@@ -140,17 +143,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(
+        configuration.setAllowedOriginPatterns(
                 Arrays.stream(corsAllowedOrigins.split(","))
                         .map(String::trim)
                         .filter(origin -> !origin.isBlank())
                         .toList()
         );
 
-        // Allowed HTTP methods for API calls.
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
-        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
         // Allowed request headers.
         // "Authorization" is required for JWT Bearer tokens.
