@@ -7,6 +7,10 @@ services:
     dockerContext: ./backend
     healthCheckPath: /api/health
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shared-expense-db
+          property: connectionString
       - key: DATABASE_HOST
         fromDatabase:
           name: shared-expense-db

@@ -3,6 +3,9 @@ package com.spreetail.expenses;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.net.URI;
+import java.util.Map;
+
 /**
  * Main entry point for the Shared Expense Tracker application.
  *
@@ -24,6 +27,86 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ExpensesApplication {
 
     public static void main(String[] args) {
+        configureDatasourceFromEnvironment();
         SpringApplication.run(ExpensesApplication.class, args);
+    }
+
+    private static void configureDatasourceFromEnvironment() {
+        Map<String, String> env = System.getenv();
+
+        String configuredUrl = firstPresent(
+                env.get("DATABASE_JDBC_URL"),
+                env.get("DATABASE_URL"),
+                env.get("INTERNAL_DATABASE_URL"),
+                env.get("EXTERNAL_DATABASE_URL")
+        );
+
+        String jdbcUrl = toJdbcPostgresUrl(configuredUrl);
+        if (jdbcUrl == null) {
+            String host = env.get("DATABASE_HOST");
+            String database = env.get("DATABASE_NAME");
+            if (hasText(host) && hasText(database)) {
+                jdbcUrl = "jdbc:postgresql://" + host + "/" + database;
+            }
+        }
+
+        if (jdbcUrl != null) {
+            System.setProperty("spring.datasource.url", jdbcUrl);
+            System.out.println("Using PostgreSQL JDBC URL: " + jdbcUrl.replaceAll("//.*@", "//***:***@"));
+        }
+    }
+
+    private static String toJdbcPostgresUrl(String rawUrl) {
+        if (!hasText(rawUrl)) {
+            return null;
+        }
+
+        String uriValue = rawUrl.startsWith("jdbc:")
+                ? rawUrl.substring("jdbc:".length())
+                : rawUrl;
+
+        if (!uriValue.startsWith("postgres://") && !uriValue.startsWith("postgresql://")) {
+            return rawUrl.startsWith("jdbc:postgresql://") ? removeInvalidPort(rawUrl) : null;
+        }
+
+        try {
+            URI uri = URI.create(uriValue.replaceFirst("^postgres://", "postgresql://"));
+            String host = uri.getHost();
+            String path = uri.getRawPath();
+            if (!hasText(host) || !hasText(path) || "/".equals(path)) {
+                return null;
+            }
+
+            StringBuilder jdbcUrl = new StringBuilder("jdbc:postgresql://").append(host);
+            if (uri.getPort() > 0) {
+                jdbcUrl.append(":").append(uri.getPort());
+            }
+            jdbcUrl.append(path);
+
+            if (hasText(uri.getRawQuery())) {
+                jdbcUrl.append("?").append(uri.getRawQuery());
+            }
+
+            return jdbcUrl.toString();
+        } catch (IllegalArgumentException ex) {
+            return removeInvalidPort(rawUrl);
+        }
+    }
+
+    private static String removeInvalidPort(String rawUrl) {
+        return rawUrl.replace(":-1/", "/");
+    }
+
+    private static String firstPresent(String... values) {
+        for (String value : values) {
+            if (hasText(value)) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }
