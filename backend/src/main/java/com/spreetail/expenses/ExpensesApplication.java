@@ -2,8 +2,10 @@ package com.spreetail.expenses;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.env.MapPropertySource;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,12 +29,20 @@ import java.util.Map;
 public class ExpensesApplication {
 
     public static void main(String[] args) {
-        configureDatasourceFromEnvironment();
-        SpringApplication.run(ExpensesApplication.class, args);
+        SpringApplication application = new SpringApplication(ExpensesApplication.class);
+        Map<String, Object> startupProperties = datasourcePropertiesFromEnvironment();
+        if (!startupProperties.isEmpty()) {
+            application.addInitializers(context ->
+                    context.getEnvironment().getPropertySources()
+                            .addFirst(new MapPropertySource("renderDatasourceProperties", startupProperties))
+            );
+        }
+        application.run(args);
     }
 
-    private static void configureDatasourceFromEnvironment() {
+    private static Map<String, Object> datasourcePropertiesFromEnvironment() {
         Map<String, String> env = System.getenv();
+        Map<String, Object> properties = new HashMap<>();
 
         String configuredUrl = firstPresent(
                 env.get("DATABASE_JDBC_URL"),
@@ -51,9 +61,11 @@ public class ExpensesApplication {
         }
 
         if (jdbcUrl != null) {
-            System.setProperty("spring.datasource.url", jdbcUrl);
+            properties.put("spring.datasource.url", jdbcUrl);
             System.out.println("Using PostgreSQL JDBC URL: " + jdbcUrl.replaceAll("//.*@", "//***:***@"));
         }
+
+        return properties;
     }
 
     private static String toJdbcPostgresUrl(String rawUrl) {
